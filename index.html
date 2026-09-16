@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>御邸四案｜多元御邸</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23b08d3e'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='%23fbfaf7' font-family='serif'%3E%E5%BE%A1%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Noto Sans TC",system-ui,-apple-system,sans-serif;}
+:root{
+  --gold:#b08d3e;
+  --dark:#1c1c1c;
+  --light-bg:#f8f5ef;
+  --text:#2a2a2a;
+  --divider:#dddddd;
+}
+body{background-color:var(--light-bg);color:var(--text);line-height:1.8;}
+
+/* 頂部導航，還原截圖樣式 */
+header{background-color:transparent;position:absolute;width:100%;padding:24px 40px;display:flex;justify-content:space-between;align-items:center;z-index:99;}
+.brand{font-size:24px;font-weight:600;color:var(--gold);letter-spacing:3px;}
+.nav-desktop{display:flex;gap:32px;}
+.nav-desktop a{color:#222;text-decoration:none;font-size:16px;}
+.nav-desktop a:hover{color:var(--gold);}
+.menu-toggle{display:none;font-size:26px;color:#222;cursor:pointer;}
+.nav-mobile{display:none;position:absolute;top:72px;left:0;width:100%;background:var(--light-bg);padding:24px 40px;flex-direction:column;gap:16px;}
+.nav-mobile.show{display:flex;}
+.nav-mobile a{color:#222;text-decoration:none;font-size:16px;}
+
+/* 首頁大banner區，完全還原截圖 */
+.hero{padding:160px 40px 100px;text-align:center;}
+.hero-subtitle{font-size:16px;color:#777;letter-spacing:2px;margin-bottom:24px;}
+.hero-title{font-size:56px;font-weight:bold;line-height:1.3;margin-bottom:24px;}
+.hero-desc{max-width:800px;margin:0 auto 40px;font-size:18px;color:#555;line-height:1.8;}
+.hero-buttons{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}
+.hero-btn{padding:14px 32px;border-radius:999px;text-decoration:none;font-size:16px;}
+.btn-black{background:#111;color:#fff;}
+.btn-outline{border:1px solid #222;color:#222;}
+.hero-btn:hover{opacity:0.85;}
+
+/* 主容器：大留白，大方質感 */
+.container{max-width:1280px;margin:0 auto;padding:0 40px 80px;}
+
+/* 每個專案區塊 */
+.section-block{margin-bottom:80px;}
+.section-heading{font-size:32px;font-weight:600;color:var(--dark);border-left:5px solid var(--gold);padding-left:16px;margin-bottom:32px;}
+
+/* 左右分欄：左文字｜右雲端多媒體 */
+.split-row{display:grid;grid-template-columns: 1fr 1fr;gap:48px;}
+.col-left{}
+.col-right{}
+
+.col-right .media-wrap{margin-bottom:32px;}
+.col-right img{max-width:100%;max-height:480px;border-radius:8px;object-fit:contain;margin:12px 0;}
+.col-right video{max-width:100%;border-radius:8px;margin:12px 0;}
+.col-right iframe{width:100%;height:460px;border-radius:8px;border:1px solid #ccc;margin:12px 0;}
+.media-file-name{font-size:14px;color:#555;}
+.link-view{color:var(--gold);text-decoration:underline;font-size:15px;display:inline-block;margin-top:6px;}
+
+/* 預約區塊 */
+.contact-block{margin:80px 0 40px 0;padding:40px;background:#fff;border-radius:12px;}
+.contact-block h2{font-size:28px;border-left:5px solid var(--gold);padding-left:16px;margin-bottom:24px;}
+.tel-link{font-size:24px;color:var(--gold);font-weight:bold;text-decoration:none;}
+.btn-google{display:inline-block;background:var(--gold);color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;margin:20px 0 0 0;font-size:16px;}
+.btn-google:hover{opacity:0.92;}
+
+footer{background:var(--dark);color:#fff;text-align:center;padding:32px;font-size:15px;}
+footer a{color:var(--gold);text-decoration:none;}
+
+#test-area{margin-top:60px;padding:24px;background:#fff;border-radius:8px;}
+#testOutput{background:#111;color:#52e369;padding:16px;border-radius:6px;margin-top:12px;white-space:pre-wrap;font-size:12px;min-height:120px;}
+
+/* 手機版 */
+@media(max-width:860px){
+  header{padding:20px 24px;}
+  .nav-desktop{display:none;}
+  .menu-toggle{display:block;}
+  .hero{padding:120px 24px 60px;}
+  .hero-title{font-size:36px;}
+  .hero-buttons{flex-direction:column;align-items:center;}
+  .container{padding:0 24px 60px;}
+  .section-heading{font-size:26px;}
+  .split-row{grid-template-columns:1fr;gap:32px;}
+  .col-right iframe{height:320px;}
+  .contact-block{padding:24px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">御邸四案</div>
+  <nav class="nav-desktop">
+    <a href="#commercial">商辦</a>
+    <a href="#residence">住宅</a>
+    <a href="#vietnam">越南</a>
+    <a href="#zhuhai">珠海</a>
+    <a href="#explain">說明</a>
+    <a href="#contact">預約</a>
+  </nav>
+  <div class="menu-toggle" id="menuBtn"><i class="fa fa-bars"></i></div>
+  <nav class="nav-mobile" id="mobileMenu">
+    <a href="#commercial">商辦</a>
+    <a href="#residence">住宅</a>
+    <a href="#vietnam">越南</a>
+    <a href="#zhuhai">珠海</a>
+    <a href="#explain">說明</a>
+    <a href="#contact">預約</a>
+  </nav>
+</header>
+
+<!-- 首頁大標題區，完全對應截圖 -->
+<section class="hero">
+  <div class="hero-subtitle">四案菁選 · 台灣二案與海外布局</div>
+  <h1 class="hero-title">多元布局，成就不同人生</h1>
+  <div class="hero-desc">
+一座立足中山北路的企業總部，一棟隱於陽明山的私人行館，<br>
+一座平陽新城的國際旗艦造鎮，以及珠海準現房的黃金撿漏。
+  </div>
+  <div class="hero-buttons">
+    <a href="#commercial" class="hero-btn btn-black">探索商辦樞紐</a>
+    <a href="#residence" class="hero-btn btn-outline">探索山居秘境</a>
+    <a href="#vietnam" class="hero-btn btn-outline">探索海外布局</a>
+    <a href="#zhuhai" class="hero-btn btn-outline">探索珠海置產</a>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- 商業案 -->
+  <section class="section-block" id="commercial">
+    <h2 class="section-heading">方案一 · 商業大樓</h2>
+    <div class="split-row">
+      <div class="col-left">
+        <h3 style="margin-bottom:16px;font-size:22px;">商業案｜多元御邸商辦</h3>
+        <p>本商辦專案位於核心商業區，鄰近交通樞紐，兼具穩定租金收益與長期增值潛力。空間規劃彈性，可做企業辦公室、實體門店、產品展示場域，適合企業置產與資產投資客。</p>
+        <br>
+        <p><strong>專案特色</strong></p>
+        <ul style="padding-left:22px;margin:10px 0;">
+          <li>臨路面寬充足，廣告曝光效果佳</li>
+          <li>低公設比，實際可使用坪數高</li>
+          <li>規劃充足停車空間，滿足商業營運需求</li>
+          <li>周邊產業持續發展，出租市場需求穩定</li>
+        </ul>
+        <br>
+        <p><strong>適合族群：</strong>企業總部、品牌門店經營者、長期不動產投資人</p>
+      </div>
+      <div class="col-right" id="media-commercial">讀取雲端多媒體……</div>
+    </div>
+  </section>
+
+  <!-- 住宅案 -->
+  <section class="section-block" id="residence">
+    <h2 class="section-heading">方案二 · 住宅社區</h2>
+    <div class="split-row">
+      <div class="col-left">
+        <h3 style="margin-bottom:16px;font-size:22px;">住宅案｜多元御邸住宅社區</h3>
+        <p>純住宅大樓，居住環境安寧舒適，鄰近學區、公園以及完整生活商圈。戶型以2‑3房為主，格局方正、採光通風良好，同時適合家庭自住或是收租投資。</p>
+        <br>
+        <p><strong>專案特色</strong></p>
+        <ul style="padding-left:22px;margin:10px 0;">
+          <li>完整社區公設：景觀花園、會館、兒童休憩區</li>
+          <li>低噪音居住環境，適合家庭長期定居</li>
+          <li>鄰近大眾運輸，日常通勤方便</li>
+          <li>區域房價穩定，物件出租流通性良好</li>
+        </ul>
+        <br>
+        <p><strong>適合族群：</strong>自住家庭、置產收租投資人</p>
+      </div>
+      <div class="col-right" id="media-residence">讀取雲端多媒體……</div>
+    </div>
+  </section>
+
+  <!-- 越南案 -->
+  <section class="section-block" id="vietnam">
+    <h2 class="section-heading">方案三 · 越南專案</h2>
+    <div class="split-row">
+      <div class="col-left">
+        <h3 style="margin-bottom:16px;font-size:22px;">越南案｜海外不動產專案</h3>
+        <p>越南胡志明市市中心精品住宅，東南亞熱門海外置產標的。受惠當地人口與就業紅利，具備不錯租金回報，可做個人資產多元配置。</p>
+        <br>
+        <p><strong>專案特色</strong></p>
+        <ul style="padding-left:22px;margin:10px 0;">
+          <li>市中心黃金地段，緊鄰商圈與辦公聚集區</li>
+          <li>租金收益表現良好，受白領與外籍租戶青睞</li>
+          <li>做海外資產配置，分散單一市場風險</li>
+          <li>建商開發實績穩定，工程進度可控</li>
+        </ul>
+        <br>
+        <p><strong>適合族群：</strong>海外資產配置、長期海外投資人</p>
+      </div>
+      <div class="col-right" id="media-vietnam">讀取雲端多媒體……</div>
+    </div>
+  </section>
+
+  <!-- 珠海案 -->
+  <section class="section-block" id="zhuhai">
+    <h2 class="section-heading">方案四 · 珠海專案</h2>
+    <div class="split-row">
+      <div class="col-left">
+        <h3 style="margin-bottom:16px;font-size:22px;">珠海案｜粵港澳大灣區物業</h3>
+        <p>珠海臨灣精品住宅，位於粵港澳大灣區重點發展板塊，往返港澳交通便利，基礎建設持續升級，適合灣區布局與度假置產。</p>
+        <br>
+        <p><strong>專案特色</strong></p>
+        <ul style="padding-left:22px;margin:10px 0;">
+          <li>受惠灣區政策，城市基礎建設不斷升級</li>
+          <li>景觀戶型，可做自住或度假休憩使用</li>
+          <li>往返港澳交通網絡完善</li>
+          <li>周邊生活配套成熟，商圈、醫療、學區齊全</li>
+        </ul>
+        <br>
+        <p><strong>適合族群：</strong>大灣區置產、度假自住、長期價值投資</p>
+      </div>
+      <div class="col-right" id="media-zhuhai">讀取雲端多媒體……</div>
+    </div>
+  </section>
+
+  <!-- 預約諮詢 -->
+  <section class="contact-block" id="contact">
+    <h2>預約諮詢</h2>
+    <p>預約電話：<a href="tel:+886926219195" class="tel-link">+886 926 219 195</a></p>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScs4X8MCCft1H7rUOTjXPSSzMIcbWyYqTbpSuwRb3VirzSbDw/viewform?entry.1673075897=004" target="_blank" class="btn-google">
+      <i class="fa fa-wpforms"></i> 線上預約表單
+    </a>
+    <p style="margin-top:12px;">歡迎預約參觀，洽詢各專案完整細節。</p>
+  </section>
+
+  
+</div>
+
+<footer>
+御邸四案｜預約電話：<a href="tel:+886926219195">886‑926‑219‑195</a>
+</footer>
+
+<script>
+// Supabase設定
+const SUPABASE_URL = "https://dcgjpkveatkyrfnpefnb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjZ2pwa3ZlYXRreXJmbnBlZm5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODE3NzcsImV4cCI6MjEwNTA1Nzc3N30.zriszFIlFdUfuvPa_ht9umQWYjui4nDcpWan5iboL3c";
+const BUCKET_NAME = "property-photos";
+
+const { createClient } = window.supabase;
+const sbClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 對應儲存桶資料夾
+const foldersMap = {
+  commercial:"commercial",
+  residence:"residence",
+  vietnam:"vietnam",
+  zhuhai:"zhuhai"
+};
+
+// 渲染右側雲端多媒體
+async function loadMedia(sectionKey, domId){
+  const el = document.getElementById(domId);
+  const folder = foldersMap[sectionKey];
+  el.innerHTML = "<div>讀取雲端檔案中…</div>";
+
+  const {data,error} = await sbClient.storage.from(BUCKET_NAME).list(folder);
+  if(error){
+    el.innerHTML = `<div style="color:#b30000;">讀取失敗：${error.message}</div>`;
+    return;
+  }
+  if(!data || data.length === 0){
+    el.innerHTML = `<div style="color:#666;">此專案尚無雲端檔案，請於Supabase後台上傳圖片、PDF、影片。</div>`;
+    return;
+  }
+
+  let html = "";
+  for(const item of data){
+    const {data:urlObj} = sbClient.storage.from(BUCKET_NAME).getPublicUrl(`${folder}/${item.name}`);
+    const fileUrl = urlObj.publicUrl;
+    const ext = item.name.split('.').pop().toLowerCase();
+
+    html += `<div class="media-wrap">`;
+    html += `<div class="media-file-name">${item.name}</div>`;
+    if(["jpg","jpeg","png","gif","webp"].includes(ext)){
+      html += `<img src="${fileUrl}" alt="${item.name}">`;
+    }else if(["mp4","webm","mov"].includes(ext)){
+      html += `<video controls><source src="${fileUrl}"></video>`;
+    }else if(ext === "pdf"){
+      html += `<iframe src="${fileUrl}"></iframe>`;
+    }else{
+      html += `<div>一般附件檔案</div>`;
+    }
+    html += `<a target="_blank" href="${fileUrl}" class="link-view"><i class="fa fa-external-link"></i> 新分頁打開 / 下載</a>`;
+    html += `</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// 頁面載入就自動讀取四區多媒體
+loadMedia("commercial","media-commercial");
+loadMedia("residence","media-residence");
+loadMedia("vietnam","media-vietnam");
+loadMedia("zhuhai","media-zhuhai");
+
+// 連線測試按鈕
+document.querySelector("#runTest").addEventListener("click",async ()=>{
+  const out = document.querySelector("#testOutput");
+  let logText = "";
+  function log(s){ logText += s+"\n"; out.innerText = logText; }
+  log("===== Supabase連線測試 =====");
+  const {data:buckets,err} = await sbClient.storage.listBuckets();
+  if(err){ log("❌錯誤："+err.message); return; }
+  const match = buckets.find(b=>b.id === BUCKET_NAME);
+  if(!match){ log(`❌找不到儲存桶：${BUCKET_NAME}`); return; }
+  log(`✅連線正常，Bucket：${BUCKET_NAME}`);
+  log("✅網頁僅供瀏覽，訪客沒有任何上傳功能");
+});
+
+// 手機漢堡選單
+const menuBtn = document.getElementById("menuBtn");
+const mobileMenu = document.getElementById("mobileMenu");
+menuBtn.onclick = ()=> mobileMenu.classList.toggle("show");
+mobileMenu.querySelectorAll("a").forEach(link=>{
+  link.onclick = ()=> mobileMenu.classList.remove("show");
+});
+</script>
+</body>
+</html>
